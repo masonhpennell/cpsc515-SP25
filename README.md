@@ -11,7 +11,9 @@
 2. **Install software** (to default location)
   - Visual Studio Code
   - Anaconda
-3. **Create python virtual environment and install PyGame and PyOpenGL**
+3. **Install Python Computing Libraries**
+  - type `pip install numpy`
+4. **Create python virtual environment and install PyGame and PyOpenGL**
 #### Windows
 ##### Create and activate Anaconda virtual environment
   - Open Anaconda Promopt Command Window
@@ -36,8 +38,7 @@
   - *Note: if you got errors when running the above command, try **one** of the following*
     - `pip install PyOpenGL PyOpenGL_accelerate`
     - `pip3 install PyOpenGL`
-4. **Install Python Computing Libraries**
-  - type `pip install numpy`
+
 ### Run the helloworld code
 1. **Download code**
   - Under this github repo, go to Code -> Download Zip
