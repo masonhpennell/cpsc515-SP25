@@ -61,6 +61,7 @@ def is_button_clicked(mouse_x, mouse_y, button_x, button_y, button_width, button
 
 def main():
     pygame.init()                                                                                               # initialize a pygame program
+    glutInit()                                                                                                  # initialize glut library
     window_width, window_height = 600, 800                                                                      # specify the screen size of the pygame window
     screen = pygame.display.set_mode((window_width, window_height), DOUBLEBUF | OPENGL)                         # create a display of size 'screen', use double-buffers and OpenGL
     pygame.display.set_caption('CPSC515: Filters - YOUR NAME')                                                  # set title of the program window
