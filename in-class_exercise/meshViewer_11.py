@@ -156,7 +156,7 @@ def laplacian_smooth(obj, lambda_val = 0.1, iterations=1):
                 new_vertices[i] = neighbor_positions.mean(axis=0)
 
                 # TODO: Laplacian smoothing weighted with lambda - COMMENT out the above line first!
-
+                #new_vertices[i] = vertices[i] + lambda_val * (neighbor_positions.mean(axis=0) - vertices[i])
                 
         vertices = new_vertices
 
