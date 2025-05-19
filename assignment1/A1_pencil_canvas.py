@@ -59,53 +59,45 @@ class Canvas:
     # Function to convert intensity (float, [0, 1]) to an integer [0 - 255]
     #   Return grayscale as an integer
     def floatToInt(self, intensity):
-        grayscale = 0 # initialize variable grayscale
-        # TODO: Task 1.1: Write your code below
-
-
-        return grayscale
+        return int(intensity * 255)
 
     # Function to convert (row, column) coordinates 
     #   into an index in a 1D array in row-majored order
     #   Return index
     def posToIndex(self, row, column):
-        index = 0 # initialize variable index
-
-        # TODO: Task 2.1: Write your code below
-
-
-        return index 
+        return row * self.width + column
 
     # Initialize the canvas data with grayscale (int, [0 - 255])
     def initGrayCanvas(self):
-        # TODO: Task 1.2: Write your code below
-        intensity = 0.123 # TODO: Task 1.4: Modify this to see the difference in grayscale
- 
-        
-        # TODO: Task 2.3: call your function `createHeart()` below
-
+        intensity = 0.2 # TODO: Task 1.4: Modify this to see the difference in grayscale
+        gray = self.floatToInt(intensity)
+        self.data = [(gray, gray, gray, 255) for _ in range(self.width * self.height)]
+        self.createHeart()
 
     # Initialize the canvas data with RGBA color data
     def initColorCanvas(self):
         constant_color = (0, 123, 123, 255) # (r,g,b,a)
-        # TODO: Task 4.1: Write your code below
-
+        self.data = [constant_color for _ in range(self.width * self.height)]
 
     # Function to create a heart on a grayscale image
     #   Modify specific pixels in self.data by set the intensity to 1.0 so it draws a heart 
     def createHeart(self):
-        # TODO: Task 2.2: Write your code below
-
-
-        return 0 # you may remove this
+        heart_coords = [
+            (2, 5), (3, 4), (3, 6), (4, 3), (4, 7), 
+            (5, 2), (5, 8), (6, 2), (6, 8), (7, 3), 
+            (7, 7), (7, 4), (7, 6), (6, 5)
+        ]
+        for y, x in heart_coords:
+            self.data[self.posToIndex(y, x)] = (255, 255, 255, 255)
 
     # Function to draw a flower centered onthe input position
-    def draw_flower(self, x, y):
-        # TODO: Task 5.1: Write your code below
+    def draw_flower(self, y, x):
+        self.data[self.posToIndex(y, x)] = (255, 255, 255, 255)
+        for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < self.height and 0 <= nx < self.width:
+                self.data[self.posToIndex(ny, nx)] = (255, 0, 255, 255)
 
-
-
-        return 0 # you may remove this
 
     # Function to render the image on the canvas using OpenGL
     def render(self):

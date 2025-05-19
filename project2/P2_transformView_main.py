@@ -5,7 +5,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import numpy as np
 
-from P2_transformView_model_BLANK import Camera, Scarecrow
+from P2_transformView_model import Camera, Scarecrow
 
 width, height = 800, 600                                                    # width and height of the screen created
 
@@ -44,7 +44,7 @@ def main():
 
     screen = (width, height)                                                # specify the screen size of the new program window
     display_surface = pygame.display.set_mode(screen, DOUBLEBUF | OPENGL)   # create a display of size 'screen', use double-buffers and OpenGL
-    pygame.display.set_caption('CPSC515: Transform & View - YOUR NAME')     # set title of the program window
+    pygame.display.set_caption('CPSC515: Transform & View - Mason Pennell')     # set title of the program window
 
     glEnable(GL_DEPTH_TEST)
     glMatrixMode(GL_PROJECTION)                                             # set mode to projection transformation
@@ -62,18 +62,8 @@ def main():
     camera = Camera(view_mode="front") # default view mode is "front"
 
     # initialize the states of all the designated keys
-    key_i_on = False        # if key 'I' is HELD on now
-    key_o_on = False        # if key 'O' is HELD on now
     key_l_on = False        # if key 'L' is PRESSED - Switch to turn on/off arm/leg swinging animation for walk-in-place 
     key_r_on = False        # if key 'R' is PRESSED (not held) - Switch to turn on/off straightline/freeform walking
-    key_left_on = False     # if left-arrow key is HELD on now
-    key_right_on = False    # if right-arrow key is held on now
-    key_a_on = False        # if key 'A' is HELD on now
-    key_d_on = False        # if key 'D' is HELD on now
-    key_w_on = False        # if key 'W' is HELD on now
-    key_s_on = False        # if key 'S' is HELD on now
-    key_q_on = False        # if key 'Q' is HELD on now
-    key_e_on = False        # if key 'E' is HELD on now
 
     while True:
         bResetModelMatrix = False
@@ -94,12 +84,19 @@ def main():
                 if event.key == pygame.K_0:                 # Press key '0' to reset the view by resetting the current model-view matrix
                     bResetModelMatrix = True
                 elif event.key == pygame.K_SPACE:           # Press the space bar to switch view modes: front/side/back/first_person..
-                    camera.switch_view()                    # TODO: Task 7: Switch front/side/back views here
+                    camera.switch_view()                    # Task 7: Switch front/side/back views here
+                    bResetModelMatrix = True
                 elif event.key == pygame.K_u:               # Press key 'U' to switch between the basic and upgraded Scarecrow
                     if scarecrow.version == "basic":
                         scarecrow.version = "upgraded"
                     elif scarecrow.version == "upgraded":
                         scarecrow.version = "basic"
+                elif event.key == pygame.K_l:               # Press key 'L' to turn on/off arm/leg swinging animation for walk-in-place
+                    key_l_on = not key_l_on
+                elif event.key == pygame.K_r:               # Press key 'R' to turn on/off straightline/freeform walking
+                    key_r_on = not key_r_on
+                elif event.key == pygame.K_ESCAPE:          # Press key 'ESC' to quit the program
+                    pygame.quit()
                 # add more key events and set key states here...
 
             
@@ -107,32 +104,63 @@ def main():
         
         #--------END: pygame.event.get()
 
-        # TODO: Task 2: Update Scarecrow's head angle based on I, O key states
+        # Task 2: Update Scarecrow's head angle based on I, O key states
+        if pygame.key.get_pressed()[pygame.K_i] & (scarecrow.head_angle < 85.0):
+            scarecrow.head_angle += 1.0
+        if pygame.key.get_pressed()[pygame.K_o] & (scarecrow.head_angle > -85.0):
+            scarecrow.head_angle -= 1.0
 
-
-
-        # TODO: Task 4: Update Scarecrow's limb motion parameters (arm_angle, leg_angle) for walk-in-place 
+        # Task 4: Update Scarecrow's limb motion parameters (arm_angle, leg_angle) for walk-in-place 
         #        based on L, R key states
+        if key_l_on:
+            # === Update arm angle ===
+            scarecrow.arm_angle += scarecrow.arm_direction * scarecrow.swing_speed
+            if abs(scarecrow.arm_angle) > 30:
+                scarecrow.arm_angle = 30 * scarecrow.arm_direction
+                scarecrow.arm_direction *= -1  # reverse swing direction
 
-            
+            # === Update leg angle ===
+            scarecrow.leg_angle += scarecrow.leg_direction * scarecrow.swing_speed
+            if abs(scarecrow.leg_angle) > 30:
+                scarecrow.leg_angle = 30 * scarecrow.leg_direction
+                scarecrow.leg_direction *= -1  # reverse swing direction            
         
-        # TODO: Task 5 and Task 6: Update Scarecrow's walk motion parameters 
+        # Task 5 and Task 6: Update Scarecrow's walk motion parameters 
         #       (walk_angle, walk_direction, walk_vector) for straightline walk and freeform walk  
         #        based on LEFT and RIGHT key states
         #       Call `update_walk_vector()` after updating walk_angle
+        if key_r_on:
+            if not key_l_on:
+                key_l_on = True
+            # === Update walk angle ===
+            if pygame.key.get_pressed()[pygame.K_LEFT]:
+                scarecrow.walk_angle += 4.0
+            if pygame.key.get_pressed()[pygame.K_RIGHT]:
+                scarecrow.walk_angle -= 4.0
 
-
-
-
+            # === Update walk vector ===
+            scarecrow.update_walk_vector()
         
         # TODO: Task 8: Update viewing parameters to transform (tilt, move forward/backward) the camera
         #       based on W/A/S/D/Q/E key states
-
-
-
+        if pygame.key.get_pressed()[pygame.K_w]:
+            camera.tilt_angle_vertical += 3
+        if pygame.key.get_pressed()[pygame.K_s]:
+            camera.tilt_angle_vertical -= 3
+        if pygame.key.get_pressed()[pygame.K_a]:
+            camera.tilt_angle_horizontal += 3
+        if pygame.key.get_pressed()[pygame.K_d]:
+            camera.tilt_angle_horizontal -= 3
+        if pygame.key.get_pressed()[pygame.K_q]:
+            camera.zoom_distance -= 0.5
+        if pygame.key.get_pressed()[pygame.K_e]:
+            camera.zoom_distance += 0.5
 
         # When '0' is tapped, reset the view 
         if (bResetModelMatrix):
+            camera.zoom_distance = 0.0
+            camera.tilt_angle_vertical = 0.0
+            camera.tilt_angle_horizontal = 0.0
             glLoadIdentity()
             modelMatrix = initmodelMatrix
         glMultMatrixf(modelMatrix)
@@ -140,7 +168,7 @@ def main():
 
         glLoadIdentity()
         
-        # TODO: Task 7: Upate camera parameters: eye_position and look_at point
+        # Task 7: Upate camera parameters: eye_position and look_at point
         new_eye_pos, new_lookat = camera.update_view()
 
         # Use updated camera parameters to update camera model
@@ -151,7 +179,7 @@ def main():
 
         glMultMatrixf(modelMatrix)        
 
-        # TODO: Task 1 & Task 3: Draw Scarecrow
+        # Task 1 & Task 3: Draw Scarecrow
         if scarecrow.version == "basic":        
             scarecrow.draw_Scarecrow()
         elif scarecrow.version == "upgraded":

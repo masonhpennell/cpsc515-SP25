@@ -6,8 +6,8 @@ from OpenGL.GLUT import *  # Import GLUT for text rendering
 from OpenGL.GLUT import GLUT_BITMAP_HELVETICA_18  # Import GLUT for text rendering
 import numpy as np
 
-from P1_filter_canvas_BLANK import Canvas
-from P1_filter_GUI_BLANK import UI
+from P1_filter_canvas import Canvas
+from P1_filter_GUI import UI
 
 def initialize_texture(canvas):
     # Convert the array of Pixel containers into a flat numpy array
@@ -61,10 +61,10 @@ def is_button_clicked(mouse_x, mouse_y, button_x, button_y, button_width, button
 
 def main():
     pygame.init()                                                                                               # initialize a pygame program
-    glutInit()                                                                                                  # initialize glut library
+    glutInit()
     window_width, window_height = 600, 800                                                                      # specify the screen size of the pygame window
     screen = pygame.display.set_mode((window_width, window_height), DOUBLEBUF | OPENGL)                         # create a display of size 'screen', use double-buffers and OpenGL
-    pygame.display.set_caption('CPSC515: Filters - YOUR NAME')                                                  # set title of the program window
+    pygame.display.set_caption('CPSC515: Filters - Mason Pennell')                                                  # set title of the program window
     
     # Set up the OpenGL viewport and projection
     glViewport(0, 0, window_width, window_height)
@@ -76,7 +76,7 @@ def main():
 
     # Initialize the canvas based on input image
     canvas = Canvas(pixel_size=1)
-    image_path = os.path.join("./resources/imgs/", "mona_lisa.jpg") # TODO: switch image here 
+    image_path = os.path.join("./resources/imgs/", "pinwheel.png") # TODO: switch image here 
     if os.path.exists(image_path):
         canvas.load_image(image_path)
         print(f"Image size: {canvas.width} X {canvas.height}")
@@ -109,7 +109,7 @@ def main():
     - 'Ref': use `getPixelReflected` method
     - 'Wra': use `getPixelWrapped` method
     '''
-    edge_pixel_method = 'Rep'   # TODO: Switch different edge-pixel handling methods here
+    edge_pixel_method = 'Wra'   # TODO: Switch different edge-pixel handling methods here
     shiftDir = 'shiftLeft'      # TODO: set shift direction here
     num = 5                     # TODO: set shift pixel number each time here
     # END
@@ -162,13 +162,13 @@ def main():
 
                     # TODO: Switch identity and shift filter kernels here
                     #=== Identity filter
-                    canvas.filterIdentity(edge_pixel_method=edge_pixel_method)
-                    statusButton.label += "Identity kernel"
+                    #canvas.filterIdentity(edge_pixel_method=edge_pixel_method)
+                    #statusButton.label += "Identity kernel"
                     #=== Identity - end
 
                     #=== Shift filter 
-                    #canvas.filterShift(shiftDir=shiftDir, num=num, edge_pixel_method=edge_pixel_method)
-                    #statusButton.label += "+Shift kernel-" + edge_pixel_method
+                    canvas.filterShift(shiftDir=shiftDir, num=num, edge_pixel_method=edge_pixel_method)
+                    statusButton.label += "+Shift kernel-" + edge_pixel_method
                     #=== Shift - end
 
                     update_texture(texture_id=texture_id, canvas=canvas)
@@ -180,6 +180,7 @@ def main():
                     print("Apply Edge Detection: Start...")
                     sensitity = 1.0 # TODO: set sensitivity (0, 1] here
                     canvas.edgeDetection(sensitivity=sensitity)
+                    update_texture(texture_id=texture_id, canvas=canvas)
                     print("Apply Edge Detection: Done!")
                     statusButton.label += "+Sobel Kernel"
 
@@ -190,6 +191,7 @@ def main():
                     if blurKernel == "Triangle":
                         kernel_size = 3 # TODO: Set triangle kernel size here
                         canvas.triangleBlur(kernel_size=kernel_size)
+                        update_texture(texture_id=texture_id, canvas=canvas)
                         statusButton.label += "+Triangle Kernel"
                     elif blurKernel == "Gaussian":
                         blur_radius = 3 # TODO: Set blur radius here

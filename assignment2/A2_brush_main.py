@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 
-from A2_brush_canvas_BLANK import Canvas
+from A2_brush_canvas import Canvas
 
 def initialize_texture(canvas):
     # Convert the array of Pixel containers into a flat numpy array
@@ -43,7 +43,7 @@ def main():
     pygame.init()                                                                                   # initialize a pygame program
     width, height = 600, 600                                                                        # specify the screen size of the pygame window
     screen = pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)                           # create a display of size 'screen', use double-buffers and OpenGL
-    pygame.display.set_caption('CPSC515: Brushes - YOUR NAME')                                      # set title of the program window
+    pygame.display.set_caption('CPSC515: Brushes - Mason Pennell')                                  # set title of the program window
     
     
     # Set up the OpenGL viewport and projection
@@ -57,8 +57,8 @@ def main():
     canvas = Canvas(width=width, height=height, pixel_size=1)                                       # Initialize a canvas of the same resolution as the pygame window
     texture_id = initialize_texture(canvas=canvas)
     brush_color = (255, 0, 0, 255) # R,G,B,A
-    brush_radius = 30
-    canvas.initBrush(brush_radius=brush_radius, brush_color=brush_color,brush_type="constant")      # TODO: switch brush_type here
+    brush_radius = 3
+    canvas.initBrush(brush_radius=brush_radius, brush_color=brush_color,brush_type="quadratic")     # TODO: switch brush_type here
 
     glClearColor(1.0, 1.0, 1.0, 1.0)  # White background
 

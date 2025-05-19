@@ -5,16 +5,15 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from collections import namedtuple
 import numpy as np
-import P1_filter_utils_BLANK
+import P1_filter_utils
 
 # TODO: Task 2 - This function should return the gray value of a pixel 
 #       by computing a weighted sum of its red, green, and blue components.
 #       Recommend use the "luma method".
 #       Return the gray value as np.uint8 
-def rgbaToGray(color):
-
-    
-    pass # you may delete this once you write code in this function
+def rgbaToGray(color) -> np.uint8:
+    gray = 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]
+    return np.uint8(gray)
 
 # Define a Canvas for drawing an image
 class Canvas:
@@ -31,7 +30,7 @@ class Canvas:
         self.b_filtered = False
 
     def initCanvas(self):
-        canvas_color = (0, 0, 0, 255) # black color
+        canvas_color = [0, 0, 0, 255] # black color
         self.data = np.array([canvas_color] * (self.width * self.height), dtype=np.uint8)
 
     def load_image(self, image_path):
@@ -52,52 +51,40 @@ class Canvas:
     #       Convert each pixel color into a grayscale value
     #       Update the image (self.data) with the grayscale value (np.uint8)
     def filterGray(self):
-        # TODO: iterate each pixel in the image
-       
-        # TODO: call rgbaToGray() to convert rbg into grayscale
-
-        # TODO: update self.data by updating current pixel's color by setting r,g,b with the same grayscale value
-
-        pass # you may delete this once you complete this function
+        for i in range(len(self.data)):
+            gray_value = rgbaToGray(self.data[i])
+            self.data[i] = [gray_value, gray_value, gray_value, gray_value]
     
     # TODO: Task 3 - Implement Invert filter:
     #       Iterate through every pixel in the image (i.e., self.data)
     #       Inverting each color channel by subtracting its value from the maximum value, i.e., 255.
     #       Update the image (self.data) with the inverted r,g,b values (np.uint8)
     def filterInvert(self):
-        # TODO: iterate each pixel in the image
-      
-        # TODO: invert each color component
-
-        # TODO: Update self.data
-
-
-        pass # you may delete this once you complete this function
+        for i in range(len(self.data)):
+            for j in range(3):
+                self.data[i][j] = 255 - self.data[i][j]
 
     # TODO: Task 4 & Task 5 - Implement Brighten filter:
     #       Iterate through every pixel in the image
     #       Increase each color channel by 30%
     #       Update the image with the brightened r, g, b values (np.uint8)
     def filterBrighten(self):
-        # TODO: iterate each pixel in the image
-
-
-        # TODO: increase each RGB channel by 30%, but still within [0, 255]
-
-
-        # TODO: Update self.data 
-
-        
-        pass # you may delete this once you complete this function
+        for i in range(len(self.data)):
+            for j in range(3):
+                brightness = 1.3 * self.data[i][j]
+                if brightness > 255:
+                    self.data[i][j] = 255
+                else:
+                    self.data[i][j] = brightness
 
     # TODO: Task 8 - Create an identity filter kernel and call convolve2D() from FilterUtils.py with it.
     #   If your kernel is correct, convolving with the identity kernel returns the original image.
     def filterIdentity(self, edge_pixel_method):
         # TODO: Create a 3x3 Identity kernel as a 1D list (row-major order)
-        kernel = [] 
+        kernel = [0,0,0,0,1,0,0,0,0] 
 
         # Convolve the identity kernel to the image
-        P1_filter_utils_BLANK.convolve2D(data=self.data, width=self.width, height=self.height, kernel=kernel, edge_pixel_method=edge_pixel_method)
+        P1_filter_utils.convolve2D(data=self.data, width=self.width, height=self.height, kernel=kernel, edge_pixel_method=edge_pixel_method)
 
 
     # TODO: Task 9 - Create a Shift filter kernel
@@ -110,66 +97,55 @@ class Canvas:
     """
     def filterShift(self, shiftDir, num, edge_pixel_method):
         # TODO: Create a shift kernel by calling `createShiftKernel()`
-        kernel = P1_filter_utils_BLANK.createShiftKernel(shiftDir=shiftDir, num=num)
+        kernel = P1_filter_utils.createShiftKernel(shiftDir=shiftDir, num=num)
 
         # TODO: Apply 2d convolution using the shift kernel
-        P1_filter_utils_BLANK.convolve2D(data=self.data, width=self.width, height=self.height, kernel=kernel, edge_pixel_method=edge_pixel_method)
-
-        pass # you may delete this once you complete this function
+        P1_filter_utils.convolve2D(data=self.data, width=self.width, height=self.height, kernel=kernel, edge_pixel_method=edge_pixel_method)
 
 
     # TODO: Task 10 - Implement Edge Detection using Sobel operators (Separable kernels)
     def edgeDetection(self, sensitivity = 1, edge_pixel_method = 'Rep'):
-        # TODO: Convert the input image (self.data) into grayscale using `filterGray()`
+        for i in range(len(self.data)):
+            gray_value = rgbaToGray(self.data[i])
+            self.data[i] = [gray_value, gray_value, gray_value, gray_value]
+
+        # 2. Define Sobel kernels
+        sobel_x = np.array([[-1,  0,  1],
+                            [-2,  0,  2],
+                            [-1,  0,  1]], dtype=np.float64)
+
+        sobel_y = np.array([[-1, -2, -1],
+                            [ 0,  0,  0],
+                            [ 1,  2,  1]], dtype=np.float64)
+
+        # 3. Convolve with the Sobel kernels
+        gx = P1_filter_utils.convolve1d(self.data, sobel_x)
+        gy = P1_filter_utils.convolve1d(self.data, sobel_y)
+
+        # 4. Compute the gradient magnitude
+        magnitude = np.sqrt(gx**2 + gy**2)
+
+        # 5. Normalize/scale to [0, 255]
+        #    We'll clip to ensure values are in range before converting to uint8
+        magnitude = (magnitude / magnitude.max()) * 255.0
+        magnitude = np.clip(magnitude, 0, 255).astype(np.uint8)
         
-        
-        # TODO: Represent the separatable Sobel-x kernel (flipped) using a row vector and a column vector (list)
-         
-        
-        # TODO: Represent the separatable Sobel-y kernel (flipped) using a row vector and a column vector (list)
-
-
-        # TODO: Apply Sobel-x kernel, separated into a row vector and a column vector, to the original image using 1D convolution implemented in "P1_filter_utils.py"
-        #         Store the processed image into, Gx, of the same size as the original image
-
-
-        # TODO: Apply Sobel-y kernel, separated into a row vector and a column vector, to the original image using 1D convolution implemented in "P1_filter_utils.py"
-        #         Store the processed image into, Gy, of the same size as the original image
-
-
-        # TODO: Combine each the corresponding pixel values from Gx and Gy into G
-        #         Apply sensibity parameter by multiplying it with G for each pixel color channel
-        #         Then clamp the scaled gradient value to be [0,255]
-
-
-        # TODO: Determine a threshold (>=) to determine "edges" in the image
-
-
-        
-        # TODO: Initialize a 1D numpy array (np.uint8), called 'result', of the same size as the input image, 
-        #         Initialize the pixel color to be black
-
-
-
-        # TODO: Set those pixels in `result` whose corresponding values in G exceed the threshold with color white
-
-
-
-        # TODO: Copy `result` to self.data 
-
-
-
-        pass # you may delete this once you complete this function
-
-
+        final_data = []
+        for pixel in range(self.data.shape[0]):
+            g = magnitude[pixel]
+            # Replicate the same gray value into R, G, B, and set alpha=255
+            final_data.append([g, g, g, 255])
+            
+        self.data = magnitude
 
     # TODO: Task 13 - Implement Triangle Blur using a Triangle filter (separable kernels)
     def triangleBlur(self, kernel_size):
         # TODO: check if the input kernel size is value (i.e., odd number, >= 3)
-
+        if kernel_size % 2 == 0 or kernel_size < 3:
+            raise ValueError("kernel_size must be an odd number >= 3")
 
         # TODO: create a 1D triangle kernel based on kernel_size by calling `createTriangleFilter` from "P1_filter_utils.py"
-
+        kernel = P1_filter_utils.createTriangleFilter(kernel_size)
 
         # TODO: Apply two 1D triangle kernels sequentially to the image, self.data, using `convolve1D()` from "P1_filter_utils.py"
 
